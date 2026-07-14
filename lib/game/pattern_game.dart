@@ -1,5 +1,6 @@
 import 'package:flame/components.dart';
 import 'package:flame/game.dart';
+import 'package:flame_audio/flame_audio.dart';
 import 'package:flutter/material.dart';
 
 import 'components/background_component.dart';
@@ -22,6 +23,7 @@ class PatternGame extends FlameGame {
   int score = 0;
   GameRound? round;
   int _filledSlots = 0;
+  bool _bgmStarted = false;
 
   late final ScoreboardComponent scoreboard;
   PlayButtonComponent? _playButton;
@@ -35,6 +37,8 @@ class PatternGame extends FlameGame {
 
   @override
   Future<void> onLoad() async {
+    await FlameAudio.bgm.initialize();
+
     add(BackgroundComponent()..priority = -10);
     add(
       CloudComponent(
@@ -68,6 +72,11 @@ class PatternGame extends FlameGame {
   }
 
   void startRound() {
+    if (!_bgmStarted) {
+      _bgmStarted = true;
+      FlameAudio.bgm.play('background.m4a', volume: 0.4);
+    }
+
     _playButton?.removeFromParent();
     _playButton = null;
 
@@ -112,6 +121,7 @@ class PatternGame extends FlameGame {
   void onCorrectPlacement() {
     score += 10;
     scoreboard.updateScore(score);
+    FlameAudio.play('shape_match.m4a', volume: 0.8);
     _filledSlots++;
     if (_filledSlots == _slots.length) {
       _onRoundComplete();
@@ -119,6 +129,7 @@ class PatternGame extends FlameGame {
   }
 
   void _onRoundComplete() {
+    FlameAudio.play('game_over.m4a', volume: 0.8);
     add(CelebrationComponent(center: size / 2));
     add(
       TimerComponent(

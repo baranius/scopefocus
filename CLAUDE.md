@@ -80,3 +80,11 @@ Fredoka font is bundled locally as `assets/fonts/Fredoka-VariableFont.ttf` (not 
 ### Drag and drop
 
 Built entirely on Flame's own event system (`DragCallbacks`/`TapCallbacks` from `package:flame/events.dart`), not Flutter widget-level `Draggable`/`DragTarget`. `PatternGame.findMatchingEmptySlot()` does the hit-testing (distance-based, against unfilled slots whose `target` `ShapePiece` matches).
+
+### Audio
+
+Uses `flame_audio` (built on `audioplayers`). Same prefix trick as images: `FlameAudio.updatePrefix('assets/')` is set once in `main.dart` so `FlameAudio.play(...)`/`FlameAudio.bgm.play(...)` calls use bare filenames under `assets/`, not `assets/audio/...` (the package's default). Audio files are `.m4a` deliberately — Chrome (the primary dev target) doesn't support `.aif`/`.aiff` at all and is unreliable with raw `.aac` streams outside an MP4/M4A container.
+
+- `background.m4a` — looping bgm, started once via `FlameAudio.bgm.play()` (which loops automatically) on the **first** `startRound()` call (`_bgmStarted` guard). It's deliberately tied to the first play-button tap rather than app launch, since browsers block audio autoplay without a user gesture.
+- `shape_match.m4a` — one-shot SFX fired in `PatternGame.onCorrectPlacement()` on every correct placement.
+- `game_over.m4a` — one-shot SFX fired in `PatternGame._onRoundComplete()` alongside the star `CelebrationComponent`. Despite the filename, this is the round-complete/celebration sound, not a failure/game-over sound — there is no failure state in this game.
